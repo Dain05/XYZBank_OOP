@@ -1,54 +1,42 @@
 #include <iostream>
-#include <string>
+using namespace std;
 
-using std::cout;
-using std::cin;
-using std::endl;
-using std::string;
-
-// ---------------------------------------------------------
-// Group: Dain Thorpe, Shanique Wisdom,
-//        Joan Johnson-Brown, Dante Graham, Pasha Pinnock
-// Course: Introduction to Object Oriented Programming
-// Assignment 2 - Bank Inheritance (XYZ Bank)
-// ---------------------------------------------------------
-
-// Base Account class
+// Base class: Account
 class Account {
-private:
-    double balance;   // account balance
+protected:
+    double balance;   // current account balance
 
 public:
-    // Constructor receives and validates the initial balance
-    Account(double initialBalance) {
-        if (initialBalance >= 1000.0) {
-            balance = initialBalance;
+    // Constructor – validates initial balance (must be >= 1000)
+    Account(double init_balance) {
+        if (init_balance >= 1000.0) {
+            balance = init_balance;
         } else {
             balance = 0.0;
-            cout << "Warning: Initial balance must be at least $1000.\n";
-            cout << "Account balance set to $0.\n\n";
+            cout << "[Warning] Initial balance must be at least $1000.00. "
+                 << "Setting balance to 0.\n";
         }
     }
 
-    // Add money to the account
+    // Credit – add money to the account
     void credit(double amount) {
         if (amount > 0) {
             balance += amount;
         } else {
-            cout << "Credit amount must be positive.\n";
+            cout << "[Error] Credit amount must be positive.\n";
         }
     }
 
-    // Withdraw money from the account
-    // Returns true if the transaction was successful
+    // Debit – withdraw money if there is enough balance
+    // Marked virtual so derived classes can override it
     virtual bool debit(double amount) {
         if (amount <= 0) {
-            cout << "Debit amount must be positive.\n";
+            cout << "[Error] Debit amount must be positive.\n";
             return false;
         }
 
         if (amount > balance) {
-            cout << "Debit amount exceeded account balance.\n";
+            cout << "[Error] Debit amount exceeded account balance.\n";
             return false;
         }
 
@@ -56,118 +44,95 @@ public:
         return true;
     }
 
-    // Return the current balance
+    // GetBalance – returns current balance
     double getBalance() const {
         return balance;
     }
-
-    // Simple helper to display account info
-    virtual void displayInfo(const string& label) const {
-        cout << label << " balance: $" << balance << endl;
-    }
-
-    virtual ~Account() = default;
 };
 
-// ---------------------------------------------------------
-// SavingsAccount - derived from Account
-// Adds an interest rate and a function to calculate interest
-// ---------------------------------------------------------
+// Derived class: SavingsAccount
 class SavingsAccount : public Account {
 private:
-    double interestRate;   // e.g. 0.03 for 3%
+    double interestRate;   // interest rate as a percentage (e.g. 4.0 for 4%)
 
 public:
-    // Constructor: calls Account constructor, then sets interest rate
-    SavingsAccount(double initialBalance, double rate)
-        : Account(initialBalance), interestRate(rate) {}
+    // Constructor inherits from Account and also accepts interest rate
+    SavingsAccount(double init_balance, double ratePercent)
+        : Account(init_balance), interestRate(ratePercent) {}
 
-    // Return the interest earned: balance * interestRate
+    // CalculateInterest – returns interest earned (balance * rate%)
     double calculateInterest() const {
-        return getBalance() * interestRate;
+        double rate = interestRate / 100.0;   // convert percent to decimal
+        return balance * rate;
     }
 };
 
-// ---------------------------------------------------------
-// ChequingAccount - derived from Account
-// Adds a transaction fee and redefines debit()
-// ---------------------------------------------------------
+// Derived class: ChequingAccount
 class ChequingAccount : public Account {
 private:
-    double transactionFee;   // fee charged per successful transaction
+    double transactionFee;   // fee charged per successful debit
 
 public:
-    // Constructor: calls Account constructor, then sets fee
-    ChequingAccount(double initialBalance, double fee)
-        : Account(initialBalance), transactionFee(fee) {}
+    // Constructor inherits from Account and also accepts fee
+    ChequingAccount(double init_balance, double fee)
+        : Account(init_balance), transactionFee(fee) {}
 
-    // Redefine debit so that it charges a fee ONLY when
-    // the withdrawal is successful
+    // Redefined debit – subtract fee only if withdrawal is successful
     bool debit(double amount) override {
-        // First try to withdraw the requested amount
-        bool success = Account::debit(amount);
-
-        if (success) {
-            // Only charge fee when money was actually withdrawn
-            bool feeSuccess = Account::debit(transactionFee);
-
-            if (feeSuccess) {
-                cout << "Transaction fee of $" << transactionFee
-                     << " charged.\n";
-            } else {
-                cout << "Warning: Could not deduct transaction fee.\n";
+        // Try the normal debit logic from Account
+        if (Account::debit(amount)) {
+            // Only charge fee if transaction was successful
+            if (transactionFee > 0) {
+                if (transactionFee <= balance) {
+                    balance -= transactionFee;
+                    cout << "[Info] Transaction fee of $" << transactionFee
+                         << " was deducted.\n";
+                } else {
+                    cout << "[Warning] Fee could not be deducted "
+                         << "(insufficient balance for fee).\n";
+                }
             }
+            return true;
         }
 
-        return success;
+        // If base debit failed, no fee should be charged
+        return false;
     }
 };
 
-// ---------------------------------------------------------
-// Test program for Assignment 2
-// ---------------------------------------------------------
 int main() {
     cout << "=== XYZ Bank - Assignment 2 Test Program ===\n\n";
 
-    // Create a SavingsAccount with 3% interest
-    SavingsAccount savings(5000.0, 0.03);   // 3% = 0.03
+    // 1. Create a SavingsAccount object
+    cout << "Creating SavingsAccount with $5000 balance and 4% interest rate...\n";
+    SavingsAccount savings(5000.0, 4.0);
+    cout << "SavingsAccount starting balance: $" << savings.getBalance() << "\n";
 
-    // Create a ChequingAccount with a $50 transaction fee
-    ChequingAccount chequing(3000.0, 50.0);
-
-    cout << "Initial balances:\n";
-    savings.displayInfo("Savings");
-    chequing.displayInfo("Chequing");
-    cout << endl;
-
-    // ---- Test SavingsAccount interest calculation ----
+    // 2. Calculate interest and add it to the savings balance
     double interest = savings.calculateInterest();
-    cout << "Calculated interest for SavingsAccount at 3%: $"
-         << interest << endl;
-
-    cout << "Adding interest to SavingsAccount balance...\n";
+    cout << "Calculated interest: $" << interest << "\n";
     savings.credit(interest);
+    cout << "SavingsAccount balance after interest credited: $"
+         << savings.getBalance() << "\n\n";
 
-    cout << "Savings balance after adding interest:\n";
-    savings.displayInfo("Savings");
-    cout << endl;
+    // 3. Create a ChequingAccount object
+    cout << "Creating ChequingAccount with $3000 balance and $50 fee...\n";
+    ChequingAccount chequing(3000.0, 50.0);
+    cout << "ChequingAccount starting balance: $" << chequing.getBalance() << "\n";
 
-    // ---- Test ChequingAccount withdrawal with enough funds ----
-    cout << "Attempting to withdraw $500 from ChequingAccount...\n";
+    // 4. Perform a successful withdrawal and show that the fee is charged
+    cout << "\nAttempting to withdraw $500 from ChequingAccount...\n";
     chequing.debit(500.0);
+    cout << "ChequingAccount balance after withdrawal and fee: $"
+         << chequing.getBalance() << "\n";
 
-    cout << "Chequing balance after withdrawal and fee:\n";
-    chequing.displayInfo("Chequing");
-    cout << endl;
+    // 5. Attempt a withdrawal that should fail (no fee should be charged)
+    cout << "\nAttempting to withdraw $5000 from ChequingAccount "
+         << "(expected to fail)...\n";
+    chequing.debit(5000.0);
+    cout << "ChequingAccount balance after failed withdrawal (no fee charged): $"
+         << chequing.getBalance() << "\n";
 
-    // ---- Test ChequingAccount withdrawal with too much money ----
-    cout << "Attempting to withdraw $10000 from ChequingAccount...\n";
-    chequing.debit(10000.0);
-
-    cout << "Chequing balance after failed withdrawal:\n";
-    chequing.displayInfo("Chequing");
-    cout << endl;
-
-    cout << "=== End of tests ===\n";
+    cout << "\n=== End of test program ===\n";
     return 0;
 }

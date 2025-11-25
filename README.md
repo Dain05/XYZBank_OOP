@@ -1,104 +1,77 @@
-\# XYZ Bank – Assignment 2
+XYZ Bank – Assignment 2
 
+Course:
+Introduction to Object Oriented Programming
+Lecturer: Doron Williams
 
+Group Members:
+Dain Thorpe
+Shanique Wisdom
+Joan Johnson-Brown
+Dante Graham
+Pasha Pinnock
 
-\## Course
+Description:
+This project is Assignment 2 and continues from Assignment 1. The goal is to expand the XYZ Bank application by using inheritance, constructors, and redefined member functions. The program now includes two derived classes: SavingsAccount and ChequingAccount, both of which inherit from the Account base class.
 
-Introduction to Object Oriented Programming  
+Class Structure:
 
+1. Account (Base Class)
+- Private data member:
+  balance: double
 
+- Constructor:
+  Validates that the initial balance is greater than or equal to $1000. If not, sets balance to 0 and displays a warning message.
 
-\## Group Members
+- Member functions:
+  credit(double amount)           -- adds money to the balance
+  virtual bool debit(double amt)  -- withdraws money if sufficient funds are available
+  getBalance() const              -- returns the current balance
 
-\- Dain Thorpe  
+2. SavingsAccount (Inherits from Account)
+- Additional data member:
+  interestRate: double
 
-\- Shanique Wisdom  
+- Constructor:
+  Inherits balance from Account
+  Takes a parameter for interestRate
 
-\- Joan Johnson-Brown  
+- Member function:
+  CalculateInterest() const
+  Returns (balance * interestRate)
 
-\- Dante Graham  
+3. ChequingAccount (Inherits from Account)
+- Additional data member:
+  fee: double
 
-\- Pasha Pinnock  
+- Constructor:
+  Inherits balance from Account
+  Takes a parameter for the transaction fee
 
+- Redefined debit function:
+  debit(double amount)
+  Subtracts (amount + fee) only when the withdrawal is successful.
+  If amount exceeds balance, shows an error message and does not deduct fee.
 
+Test Program:
+- Creates a SavingsAccount object
+- Calculates interest and applies it to the balance
+- Creates a ChequingAccount object
+- Performs a successful withdrawal
+- Performs a failed withdrawal (no fee should be charged)
+- Displays all results in the console
 
-\## Description
-
-This project is a continuation of the XYZ Bank application from Assignment 1.  
-
-It implements an inheritance hierarchy with:
-
-
-
-\- `Account` (base class)  
-
-\- `SavingsAccount` (inherits from `Account`)  
-
-\- `ChequingAccount` (inherits from `Account`)  
-
-
-
-\### Account
-
-\- Stores the account `balance` as a private data member.  
-
-\- Constructor validates the initial balance (must be ≥ 1000, otherwise sets balance to 0 and prints a warning).  
-
-\- `credit(double amount)` – adds money to the balance.  
-
-\- `virtual bool debit(double amount)` – withdraws money if there are enough funds.  
-
-\- `double getBalance() const` – returns the current balance.  
-
-\- `virtual void displayInfo(const std::string\& label) const` – prints the balance with a label.
-
-
-
-\### SavingsAccount
-
-\- Inherits all `Account` functionality.  
-
-\- Has an additional private data member `interestRate`.  
-
-\- Constructor takes `initialBalance` and `interestRate` and passes the balance to the `Account` constructor.  
-
-\- `double calculateInterest() const` – returns `getBalance() \* interestRate`.
-
-
-
-\### ChequingAccount
-
-\- Inherits from `Account`.  
-
-\- Has a private data member `transactionFee`.  
-
-\- Constructor takes `initialBalance` and `transactionFee` and passes the balance to the `Account` constructor.  
-
-\- Redefines `debit(double amount)` so that it:
-
-&nbsp; - Calls `Account::debit(amount)` to attempt the withdrawal.  
-
-&nbsp; - If the withdrawal is successful, charges the transaction fee by calling `Account::debit(transactionFee)`.  
-
-&nbsp; - Only charges the fee when the withdrawal succeeds.
-
-
-
-\## How to Compile and Run
-
-
-
-From the \*\*MSYS2 UCRT64\*\* terminal:
-
-
-
-```bash
-
-cd /c/Users/Anonymous/Documents/XYZBank\_OOP
-
+Compilation Instructions (MSYS2 UCRT64):
 g++ -std=c++20 -Wall main.cpp -o bank.exe
-
 ./bank.exe
 
+Expected Output Summary:
+- SavingsAccount correctly calculates interest
+- ChequingAccount correctly charges fee only on successful withdrawals
+- Failed withdrawals show an error and do not apply the fee
+- Balances update correctly after all operations
 
-
+Notes:
+Assignment 2 continues from Assignment 1.
+Assignment 3 will also continue from this structure.
+A separate branch will be created for Assignment 3 using this updated code as the base.
