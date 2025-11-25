@@ -1,4 +1,4 @@
-XYZ Bank – Assignment 1
+XYZ Bank – Assignment 2
 
 Course:
 Introduction to Object Oriented Programming
@@ -12,44 +12,66 @@ Dante Graham
 Pasha Pinnock
 
 Description:
-This project is Assignment 1 for the XYZ Bank ATM program. It is a simple C++ console application that allows a user to:
-1. Check account balance
-2. Deposit money
-3. Withdraw money
-4. Exit the program
+This project is Assignment 2 and continues from Assignment 1. The goal is to expand the XYZ Bank application by using inheritance, constructors, and redefined member functions. The program now includes two derived classes: SavingsAccount and ChequingAccount, both of which inherit from the Account base class.
 
-The application uses a while loop and switch statement to control the menu. It also uses a basic Account class to store and manage the balance.
+Class Structure:
 
-Account Class:
+1. Account (Base Class)
 - Private data member:
-  balance (double)
+  balance: double
 
 - Constructor:
-  Account(double init_balance)
-  If init_balance is greater than or equal to 1000.00, the balance is set to that value.
-  Otherwise, the balance is set to 0 and a warning message is displayed.
+  Validates that the initial balance is greater than or equal to $1000. If not, sets balance to 0 and displays a warning message.
 
 - Member functions:
-  deposit(double amount)
-    Adds amount to the balance if amount is greater than 0.
+  credit(double amount)           -- adds money to the balance
+  virtual bool debit(double amt)  -- withdraws money if sufficient funds are available
+  getBalance() const              -- returns the current balance
 
-  withdraw(double amount)
-    Subtracts amount from the balance if there are enough funds.
-    If amount is greater than the current balance, it displays:
-    "Debit amount exceeded account balance."
+2. SavingsAccount (Inherits from Account)
+- Additional data member:
+  interestRate: double
 
-  getBalance() const
-    Returns the current balance.
+- Constructor:
+  Inherits balance from Account
+  Takes a parameter for interestRate
 
-Menu and Flow:
-- The program asks the user for an initial balance and creates an Account object.
-- A while loop keeps the ATM menu running until the user chooses option 4 (Exit).
-- A switch statement handles each menu option:
-  1 -> Display balance
-  2 -> Prompt for a deposit amount and update balance
-  3 -> Prompt for a withdrawal amount and try to withdraw
-  4 -> Exit message
+- Member function:
+  CalculateInterest() const
+  Returns (balance * interestRate)
 
-How to Compile and Run (MSYS2 UCRT64):
-g++ -std=c++20 -Wall main.cpp -o atm.exe
-./atm.exe
+3. ChequingAccount (Inherits from Account)
+- Additional data member:
+  fee: double
+
+- Constructor:
+  Inherits balance from Account
+  Takes a parameter for the transaction fee
+
+- Redefined debit function:
+  debit(double amount)
+  Subtracts (amount + fee) only when the withdrawal is successful.
+  If amount exceeds balance, shows an error message and does not deduct fee.
+
+Test Program:
+- Creates a SavingsAccount object
+- Calculates interest and applies it to the balance
+- Creates a ChequingAccount object
+- Performs a successful withdrawal
+- Performs a failed withdrawal (no fee should be charged)
+- Displays all results in the console
+
+Compilation Instructions (MSYS2 UCRT64):
+g++ -std=c++20 -Wall main.cpp -o bank.exe
+./bank.exe
+
+Expected Output Summary:
+- SavingsAccount correctly calculates interest
+- ChequingAccount correctly charges fee only on successful withdrawals
+- Failed withdrawals show an error and do not apply the fee
+- Balances update correctly after all operations
+
+Notes:
+Assignment 2 continues from Assignment 1.
+Assignment 3 will also continue from this structure.
+A separate branch will be created for Assignment 3 using this updated code as the base.
