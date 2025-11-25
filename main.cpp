@@ -1,138 +1,138 @@
-// Intro to Object Oriented Programming
-// Module 1 - Assignment 1
-// XYZ Bank ATM Program
-// Group Members:
-//   Dain Thorpe
-//   Shanique Wisdom
-//   Joan Johnson-Brown
-//   Dante Graham
-//   Pasha Pinnock
-// Lecturer: Doron Williams
-// Date: November 1, 2025
-
 #include <iostream>
 using namespace std;
 
-// Account class represents a customer's bank account
+// Base class: Account
 class Account {
-private:
-    double balance;   // account balance (data member)
+protected:
+    double balance;   // current account balance
 
 public:
-    // Constructor receives and initializes the initial balance
+    // Constructor – validates initial balance (must be >= 1000)
     Account(double init_balance) {
         if (init_balance >= 1000.0) {
             balance = init_balance;
         } else {
-            cout << "Invalid initial balance. Account set to $0.\n";
             balance = 0.0;
+            cout << "[Warning] Initial balance must be at least $1000.00. "
+                 << "Setting balance to 0.\n";
         }
     }
 
-    // Optional: setBalance if needed later
-    void setBalance(double newBalance) {
-        if (newBalance >= 0) {
-            balance = newBalance;
+    // Credit – add money to the account
+    void credit(double amount) {
+        if (amount > 0) {
+            balance += amount;
+        } else {
+            cout << "[Error] Credit amount must be positive.\n";
         }
     }
 
-    // GetBalance() returns the account's current balance
-    double getBalance() const {
-        return balance;
-    }
-
-    // Deposit() adds an amount to the current balance and returns new balance
-    double deposit(double amount) {
+    // Debit – withdraw money if there is enough balance
+    // Marked virtual so derived classes can override it
+    virtual bool debit(double amount) {
         if (amount <= 0) {
-            cout << "Deposit amount must be greater than 0.\n";
-            return balance;
-        }
-
-        balance += amount;
-        cout << "Deposit successful.\n";
-        return balance;
-    }
-
-    // Withdraw() debits money and makes sure amount does not exceed balance
-    // Returns true if withdrawal is successful, false otherwise
-    bool withdraw(double amount) {
-        if (amount <= 0) {
-            cout << "Withdrawal amount must be greater than 0.\n";
+            cout << "[Error] Debit amount must be positive.\n";
             return false;
         }
 
         if (amount > balance) {
-            cout << "Debit amount exceeded account balance.\n";
+            cout << "[Error] Debit amount exceeded account balance.\n";
             return false;
         }
 
         balance -= amount;
-        cout << "Withdrawal successful.\n";
         return true;
+    }
+
+    // GetBalance – returns current balance
+    double getBalance() const {
+        return balance;
+    }
+};
+
+// Derived class: SavingsAccount
+class SavingsAccount : public Account {
+private:
+    double interestRate;   // interest rate as a percentage (e.g. 4.0 for 4%)
+
+public:
+    // Constructor inherits from Account and also accepts interest rate
+    SavingsAccount(double init_balance, double ratePercent)
+        : Account(init_balance), interestRate(ratePercent) {}
+
+    // CalculateInterest – returns interest earned (balance * rate%)
+    double calculateInterest() const {
+        double rate = interestRate / 100.0;   // convert percent to decimal
+        return balance * rate;
+    }
+};
+
+// Derived class: ChequingAccount
+class ChequingAccount : public Account {
+private:
+    double transactionFee;   // fee charged per successful debit
+
+public:
+    // Constructor inherits from Account and also accepts fee
+    ChequingAccount(double init_balance, double fee)
+        : Account(init_balance), transactionFee(fee) {}
+
+    // Redefined debit – subtract fee only if withdrawal is successful
+    bool debit(double amount) override {
+        // Try the normal debit logic from Account
+        if (Account::debit(amount)) {
+            // Only charge fee if transaction was successful
+            if (transactionFee > 0) {
+                if (transactionFee <= balance) {
+                    balance -= transactionFee;
+                    cout << "[Info] Transaction fee of $" << transactionFee
+                         << " was deducted.\n";
+                } else {
+                    cout << "[Warning] Fee could not be deducted "
+                         << "(insufficient balance for fee).\n";
+                }
+            }
+            return true;
+        }
+
+        // If base debit failed, no fee should be charged
+        return false;
     }
 };
 
 int main() {
-    cout << "===== XYZ Bank ATM =====\n\n";
+    cout << "=== XYZ Bank - Assignment 2 Test Program ===\n\n";
 
-    // Ask user for initial balance and create the Account object
-    double initialBalance;
-    cout << "Enter your initial balance: ";
-    cin >> initialBalance;
+    // 1. Create a SavingsAccount object
+    cout << "Creating SavingsAccount with $5000 balance and 4% interest rate...\n";
+    SavingsAccount savings(5000.0, 4.0);
+    cout << "SavingsAccount starting balance: $" << savings.getBalance() << "\n";
 
-    Account account(initialBalance);
+    // 2. Calculate interest and add it to the savings balance
+    double interest = savings.calculateInterest();
+    cout << "Calculated interest: $" << interest << "\n";
+    savings.credit(interest);
+    cout << "SavingsAccount balance after interest credited: $"
+         << savings.getBalance() << "\n\n";
 
-    int choice = 0;
+    // 3. Create a ChequingAccount object
+    cout << "Creating ChequingAccount with $3000 balance and $50 fee...\n";
+    ChequingAccount chequing(3000.0, 50.0);
+    cout << "ChequingAccount starting balance: $" << chequing.getBalance() << "\n";
 
-    // while loop keeps the program running until user chooses to exit
-    while (choice != 4) {
-        cout << "\n===== XYZ Bank ATM =====\n";
-        cout << "1. Check Balance\n";
-        cout << "2. Deposit\n";
-        cout << "3. Withdraw\n";
-        cout << "4. Exit\n";
-        cout << "Choose an option: ";
-        cin >> choice;
+    // 4. Perform a successful withdrawal and show that the fee is charged
+    cout << "\nAttempting to withdraw $500 from ChequingAccount...\n";
+    chequing.debit(500.0);
+    cout << "ChequingAccount balance after withdrawal and fee: $"
+         << chequing.getBalance() << "\n";
 
-        cout << endl;
+    // 5. Attempt a withdrawal that should fail (no fee should be charged)
+    cout << "\nAttempting to withdraw $5000 from ChequingAccount "
+         << "(expected to fail)...\n";
+    chequing.debit(5000.0);
+    cout << "ChequingAccount balance after failed withdrawal (no fee charged): $"
+         << chequing.getBalance() << "\n";
 
-        switch (choice) {
-        case 1: {
-            // Check balance
-            cout << "Current balance: $" << account.getBalance() << endl;
-            break;
-        }
-        case 2: {
-            // Deposit money
-            double amount;
-            cout << "Enter amount to deposit: ";
-            cin >> amount;
-
-            account.deposit(amount);
-            cout << "New balance: $" << account.getBalance() << endl;
-            break;
-        }
-        case 3: {
-            // Withdraw money
-            double amount;
-            cout << "Enter amount to withdraw: ";
-            cin >> amount;
-
-            bool success = account.withdraw(amount);
-            if (success) {
-                cout << "New balance: $" << account.getBalance() << endl;
-            }
-            break;
-        }
-        case 4:
-            // Exit program
-            cout << "Thank you for using XYZ Bank ATM.\n";
-            break;
-        default:
-            // Handle wrong menu choice
-            cout << "Invalid option. Please choose 1 - 4.\n";
-        }
-    }
-
+    cout << "\n=== End of test program ===\n";
     return 0;
 }
