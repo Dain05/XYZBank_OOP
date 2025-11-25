@@ -8,7 +8,6 @@
 //   Dante Graham
 //   Pasha Pinnock
 // Lecturer: Doron Williams
-// Date: November 1, 2025
 
 #include <iostream>
 using namespace std;
@@ -136,3 +135,4 @@ int main() {
 
     return 0;
 }
+
