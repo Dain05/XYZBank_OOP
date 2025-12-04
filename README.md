@@ -1,56 +1,40 @@
-XYZ Bank – Assignment 1
+# XYZ Bank – Assignment 3
 
-Course:
-Introduction to Object Oriented Programming
-Lecturer: Doron Williams
+Module: Introduction to Object Oriented Programming  
+Lecturer: Doron Williams  
 
-Group Members:
-Dain Thorpe
-Shanique Wisdom
-Joan Johnson-Brown
-Dante Graham
-Pasha Pinnock
+## Group Members
 
-Description:
-This project is Assignment 1 for the XYZ Bank ATM program. It is a simple C++ console application that allows a user to:
-1. Check account balance
-2. Deposit money
-3. Withdraw money
-4. Exit the program
+- Joan Johnson-Brown  
+- Dain Thorpe  
+- Shanique Wisdom  
+- Dante Graham  
+- Pasha Pinnock  
 
-The application uses a while loop and switch statement to control the menu. It also uses a basic Account class to store and manage the balance.
+## Project Description
 
-Account Class:
-- Private data member:
-  balance (double)
+This program extends the XYZ Bank application to keep a log of all
+transactions done on an account.
 
-- Constructor:
-  Account(double init_balance)
-  If init_balance is greater than or equal to 1000.00, the balance is set to that value.
-  Otherwise, the balance is set to 0 and a warning message is displayed.
+- A **Transaction** class stores the amount, type, and status.
+- The **Account** class now has a `std::vector<Transaction>` log.
+- **SavingsAccount** and **ChequingAccount** inherit from `Account`.
+- The new `report()` functions build formatted strings that show the
+  transaction history.
+- The main file tests the new behaviour and saves the full report
+  to `transactions.txt`.
 
-- Member functions:
-  deposit(double amount)
-    Adds amount to the balance if amount is greater than 0.
+## Files
 
-  withdraw(double amount)
-    Subtracts amount from the balance if there are enough funds.
-    If amount is greater than the current balance, it displays:
-    "Debit amount exceeded account balance."
+- `Transaction.h` – Transaction class and `report()` function.  
+- `Account.h` – Account, SavingsAccount and ChequingAccount classes,
+  transaction log, and report helpers.  
+- `main.cpp` – Test code, file I/O, and exception handling.  
 
-  getBalance() const
-    Returns the current balance.
+## How to Compile and Run (MSYS2 / g++)
 
-Menu and Flow:
-- The program asks the user for an initial balance and creates an Account object.
-- A while loop keeps the ATM menu running until the user chooses option 4 (Exit).
-- A switch statement handles each menu option:
-  1 -> Display balance
-  2 -> Prompt for a deposit amount and update balance
-  3 -> Prompt for a withdrawal amount and try to withdraw
-  4 -> Exit message
+From the `Assignment3` folder:
 
-How to Compile and Run (MSYS2 UCRT64):
-g++ -std=c++20 -Wall main.cpp -o atm.exe
-./atm.exe
-
+```bash
+g++ -std=c++20 main.cpp -o bank.exe
+./bank.exe

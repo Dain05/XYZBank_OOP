@@ -1,138 +1,94 @@
-// Intro to Object Oriented Programming
-// Module 1 - Assignment 1
-// XYZ Bank ATM Program
+// XYZ Bank – Assignment 3
 // Group Members:
+//   Joan Johnson-Brown
 //   Dain Thorpe
 //   Shanique Wisdom
-//   Joan Johnson-Brown
 //   Dante Graham
 //   Pasha Pinnock
 // Lecturer: Doron Williams
 
 #include <iostream>
-using namespace std;
+#include <fstream>
+#include <string>
+#include <stdexcept>
+#include "Account.h"
 
-// Account class represents a customer's bank account
-class Account {
-private:
-    double balance;   // account balance (data member)
+// Helper function – write report string to a file
+bool saveReportToFile(const std::string& filename,
+                      const std::string& content) {
+    std::ofstream outFile(filename);
 
-public:
-    // Constructor receives and initializes the initial balance
-    Account(double init_balance) {
-        if (init_balance >= 1000.0) {
-            balance = init_balance;
-        } else {
-            cout << "Invalid initial balance. Account set to $0.\n";
-            balance = 0.0;
-        }
-    }
-
-    // Optional: setBalance if needed later
-    void setBalance(double newBalance) {
-        if (newBalance >= 0) {
-            balance = newBalance;
-        }
-    }
-
-    // GetBalance() returns the account's current balance
-    double getBalance() const {
-        return balance;
-    }
-
-    // Deposit() adds an amount to the current balance and returns new balance
-    double deposit(double amount) {
-        if (amount <= 0) {
-            cout << "Deposit amount must be greater than 0.\n";
-            return balance;
-        }
-
-        balance += amount;
-        cout << "Deposit successful.\n";
-        return balance;
-    }
-
-    // Withdraw() debits money and makes sure amount does not exceed balance
-    // Returns true if withdrawal is successful, false otherwise
-    bool withdraw(double amount) {
-        if (amount <= 0) {
-            cout << "Withdrawal amount must be greater than 0.\n";
-            return false;
-        }
-
-        if (amount > balance) {
-            cout << "Debit amount exceeded account balance.\n";
-            return false;
-        }
-
-        balance -= amount;
-        cout << "Withdrawal successful.\n";
+    if (outFile.is_open()) {
+        outFile << content;
+        outFile.close();
         return true;
     }
-};
+
+    return false;
+}
 
 int main() {
-    cout << "===== XYZ Bank ATM =====\n\n";
+    try {
+        std::cout << "--- XYZ Bank: Transaction Logger ---\n\n";
 
-    // Ask user for initial balance and create the Account object
-    double initialBalance;
-    cout << "Enter your initial balance: ";
-    cin >> initialBalance;
+        // Create test accounts
+        SavingsAccount  savings (5000.0, 0.06);   // 6% per year
+        ChequingAccount chequing(3000.0, 50.0);   // $50 fee per transaction
 
-    Account account(initialBalance);
+        // Display initial balances
+        savings.display("Dain Thorpe - Savings");
+        chequing.display("Dain Thorpe - Chequing");
+        std::cout << '\n';
 
-    int choice = 0;
+        // === Test new functionality in main() ===
 
-    // while loop keeps the program running until user chooses to exit
-    while (choice != 4) {
-        cout << "\n===== XYZ Bank ATM =====\n";
-        cout << "1. Check Balance\n";
-        cout << "2. Deposit\n";
-        cout << "3. Withdraw\n";
-        cout << "4. Exit\n";
-        cout << "Choose an option: ";
-        cin >> choice;
+        // Savings account activity
+        savings.deposit(1000.0);
+        savings.withdraw(500.0);
+        savings.applyMonthlyInterest();
 
-        cout << endl;
+        // Chequing account activity
+        chequing.deposit(2000.0);
+        chequing.withdraw(1500.0);
+        chequing.withdraw(4000.0);   // should fail (insufficient incl. fee)
 
-        switch (choice) {
-        case 1: {
-            // Check balance
-            cout << "Current balance: $" << account.getBalance() << endl;
-            break;
+        // Show transaction history on screen
+        std::cout << "\n--- Savings Transactions ---\n";
+        std::cout << savings.report() << '\n';
+
+        std::cout << "\n--- Chequing Transactions ---\n";
+        std::cout << chequing.report() << '\n';
+
+        // === Save full report to file ===
+        std::cout << "\nSaving transactions...\n";
+
+        std::string fileReport;
+        fileReport += savings.getTransactionsReport("Dain Thorpe - Savings");
+        fileReport += chequing.getTransactionsReport("Dain Thorpe - Chequing");
+
+        // You can change the path if needed (e.g. C:\\transactions.txt on Windows)
+        const std::string filename = "transactions.txt";
+
+        if (saveReportToFile(filename, fileReport)) {
+            std::cout << "Transactions successfully saved to "
+                      << filename << '\n';
+        } else {
+            throw std::runtime_error("Failed to save transactions report file");
         }
-        case 2: {
-            // Deposit money
-            double amount;
-            cout << "Enter amount to deposit: ";
-            cin >> amount;
-
-            account.deposit(amount);
-            cout << "New balance: $" << account.getBalance() << endl;
-            break;
-        }
-        case 3: {
-            // Withdraw money
-            double amount;
-            cout << "Enter amount to withdraw: ";
-            cin >> amount;
-
-            bool success = account.withdraw(amount);
-            if (success) {
-                cout << "New balance: $" << account.getBalance() << endl;
-            }
-            break;
-        }
-        case 4:
-            // Exit program
-            cout << "Thank you for using XYZ Bank ATM.\n";
-            break;
-        default:
-            // Handle wrong menu choice
-            cout << "Invalid option. Please choose 1 - 4.\n";
-        }
+    }
+    // === Defensive programming: catch any thrown exceptions ===
+    catch (const std::invalid_argument& ex) {
+        std::cerr << "\nRUNTIME ERROR (INVALID ARGUMENT): "
+                  << ex.what() << std::endl;
+    }
+    catch (const std::runtime_error& ex) {
+        std::cerr << "\nRUNTIME ERROR (FILE I/O): "
+                  << ex.what() << std::endl;
+    }
+    catch (const std::exception& ex) {
+        std::cerr << "\nRUNTIME ERROR: "
+                  << ex.what() << std::endl;
     }
 
     return 0;
 }
-
