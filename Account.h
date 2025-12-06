@@ -1,15 +1,6 @@
 #ifndef ACCOUNT_H
 #define ACCOUNT_H
 
-// XYZ Bank – Assignment 3
-// Group Members:
-//   Joan Johnson-Brown
-//   Dain Thorpe
-//   Shanique Wisdom
-//   Dante Graham
-//   Pasha Pinnock
-// Lecturer: Doron Williams
-
 #include <iostream>
 #include <string>
 #include <vector>
