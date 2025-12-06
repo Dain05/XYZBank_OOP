@@ -1,15 +1,6 @@
 #ifndef TRANSACTION_H
 #define TRANSACTION_H
 
-// XYZ Bank – Assignment 3
-// Group Members:
-//   Joan Johnson-Brown
-//   Dain Thorpe
-//   Shanique Wisdom
-//   Dante Graham
-//   Pasha Pinnock
-// Lecturer: Doron Williams
-
 #include <string>
 #include <sstream>
 #include <iomanip>
